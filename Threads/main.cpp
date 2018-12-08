@@ -122,12 +122,14 @@ public:
     }
 
     void Quit() {
-        change_iterations_.lock();
+        Stop();
+        {
+            std::lock_guard lock{change_iterations_};
 
-        quit_ = true;
-        can_iterate_.notify_one();
+            quit_ = true;
+            can_iterate_.notify_one();
+        }
 
-        change_iterations_.unlock();
         for (auto& thread: threads_) {
             thread.join();
         }
@@ -157,7 +159,7 @@ private:
                 std::unique_lock lock{change_iterations_};
                 can_iterate_.wait(lock, [this] { return required_iter_.load() > done_iter_.load() || quit_; });
 
-                if (quit_) {
+                if (done_iter_.load() == local_done) {
                     return;
                 }
                 done_iter_.fetch_add(1);
@@ -166,9 +168,9 @@ private:
                     PrintStatus();
                 }
             } else {
-                while (!(done_iter_ > local_done || quit_)) {}
+                while (!(done_iter_.load() > local_done || quit_)) {}
 
-                if (quit_) {
+                if (done_iter_.load() == local_done) {
                     return;
                 }
             }
