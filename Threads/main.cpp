@@ -49,17 +49,6 @@ private:
 } // namespace solutions
 } // namespace tpcc
 
-
-template<class T>
-const T& CyclicGet(const std::vector<T>& vec, const long index) {
-    return vec[(index + vec.size()) % vec.size()];
-}
-
-template<class T>
-T& CyclicGet(std::vector<T>& vec, const long index) {
-    return vec[(index + vec.size()) % vec.size()];
-}
-
 class GameOfLife {
 public:
     typedef std::vector<std::vector<bool>> Field;
@@ -159,7 +148,7 @@ private:
                 std::unique_lock lock{change_iterations_};
                 can_iterate_.wait(lock, [this] { return required_iter_.load() > done_iter_.load() || quit_; });
 
-                if (done_iter_.load() == local_done) {
+                if (done_iter_.load() == required_iter_.load()) {
                     return;
                 }
                 done_iter_.fetch_add(1);
@@ -199,7 +188,9 @@ private:
         size_t count = 0;
         for (int vshift = -1; vshift < 2; ++vshift) {
             for (int hshift = -1; hshift < 2; ++hshift) {
-                count += static_cast<int> (CyclicGet(CyclicGet(field, i + vshift), j + hshift));
+                size_t vind = (i + vshift + field.size()) % field.size();
+                size_t hind = (j + hshift + field[vind].size()) % field[vind].size();
+                count += static_cast<int> (field[vind][hind]);
             }
         }
         return count - static_cast<int> (field[i][j]);
