@@ -13,3 +13,17 @@
 * END — same as QUIT but also stop the whole program
 
 Other commands may cause undefined behaviour.
+
+## MPI
+
+### Commands available:
+
+* START \<source.csv>
+* START RANDOM \<height> \<width>
+* STATUS
+* RUN \<iteration_count>
+* STOP
+* QUIT
+* END — same as QUIT but also stop the whole program
+
+Other commands may cause undefined behaviour.

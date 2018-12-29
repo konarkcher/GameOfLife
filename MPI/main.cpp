@@ -9,7 +9,7 @@ class Commander {
 public:
     typedef ContigousArray<char> Field;
 
-    Commander(const size_t thread_count, const size_t height, const size_t width)
+    Commander(const size_t height, const size_t width)
             : nrow{height}, ncol{width}, field(nrow, ncol) {
         std::random_device rd;
         std::mt19937 gen(rd());
@@ -24,7 +24,7 @@ public:
         InitiateGame();
     }
 
-    Commander(const size_t thread_count, const std::string& source)
+    Commander(const std::string& source)
             : nrow{GetRowCount(source)}, ncol{GetColCount(source)}, field(nrow, ncol) {
         std::ifstream in;
         in.open(source);
@@ -61,7 +61,7 @@ public:
 
 private:
     void InitiateGame() {
-	int world_size;
+        int world_size;
         MPI_Comm_size(MPI_COMM_WORLD, &world_size);
         auto thread_count = static_cast<size_t> (world_size);
 
@@ -151,9 +151,8 @@ int main() {
             std::cin >> query;
 
             if (query == "START") {
-                size_t thread_count;
                 std::string source;
-                std::cin >> thread_count >> source;
+                std::cin >> source;
 
                 if (game) {
                     std::cout << "THE GAME HAS ALREADY STARTED\n";
@@ -164,9 +163,9 @@ int main() {
                     size_t height, width;
                     std::cin >> height >> width;
 
-                    game = new Commander(thread_count, height, width);
+                    game = new Commander(height, width);
                 } else {
-                    game = new Commander(thread_count, source);
+                    game = new Commander(source);
                 }
                 continue;
             }
