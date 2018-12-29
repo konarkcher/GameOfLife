@@ -63,10 +63,20 @@ private:
     void InitiateGame() {
         int world_size;
         MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-        auto thread_count = static_cast<size_t> (world_size);
+        auto thread_count = static_cast<size_t> (world_size) - 1;
 
-        size_t real_thread_count = std::min(thread_count - 1, nrow);
+        size_t real_thread_count = std::min(thread_count, nrow);
         size_t block_size = nrow / real_thread_count;
+
+        char compute_command = 'c';
+        for (size_t i = 0; i < real_thread_count; ++i) {
+            MPI_Send(&compute_command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+        }
+
+        char finalize_command = 'f';
+        for (size_t i = real_thread_count; i < thread_count; ++i) {
+            MPI_Send(&finalize_command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+        }
 
         /*
  *         for (size_t i = 0; i < real_thread_count - 1; ++i) {
@@ -142,6 +152,10 @@ int main() {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
     if (world_rank != 0) {
+        char command;
+        MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        std::cout << world_rank << ' ' << command << '\n';
+
         Computer computer;
     } else {
         Commander* game = nullptr;
