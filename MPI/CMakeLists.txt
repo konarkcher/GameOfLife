@@ -8,4 +8,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MPIGameOfLife_SOURCE_DIR}/bin)
 
-add_executable(MPIGameOfLife main.cpp ContigousArray.h)
+add_executable(MPIGameOfLife main.cpp ContigousArray.h Commander.h Computer.h)
