@@ -104,9 +104,6 @@ private:
             if (neighs[0] == 0) {
                 neighs[0] = static_cast<int> (real_thread_count_);
             }
-            if(neighs[1] == real_thread_count_ + 1) {
-                neighs[1] = 1;
-            }
             MPI_Send(neighs, 2, MPI_INT, i + 1, 0, MPI_COMM_WORLD);
 
             unsigned long size[2] = {block_size, ncol_};
@@ -114,6 +111,9 @@ private:
             MPI_Send(field_[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
         unsigned long size[2] = {nrow_ - last_start, ncol_};
+        int neighs[2] = {static_cast<int> (real_thread_count_ - 1), 1};
+
+        MPI_Send(neighs, 2, MPI_INT, real_thread_count_, 0, MPI_COMM_WORLD);
         MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count_, 0, MPI_COMM_WORLD);
         MPI_Send(field_[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0, MPI_COMM_WORLD);
     }
