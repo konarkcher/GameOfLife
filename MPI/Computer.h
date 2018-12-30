@@ -10,6 +10,12 @@ public:
 
     explicit Computer(const int world_rank)
             : rank_(world_rank) {
+        int neighs[2];
+        MPI_Recv(&neighs, 2, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        prev_ = neighs[0], next_ = neighs[1];
+
+        std::cout << prev_ << ' ' << rank_ << ' ' << next_ << '\n';
+
         unsigned long size[2];
         MPI_Recv(&size, 2, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
@@ -60,6 +66,6 @@ private:
 
     size_t nrow_{0}, ncol_{0};
     unsigned long required_iter_{0}, done_iter_{0};
-    int rank_;
+    int rank_, prev_{0}, next_{0};
     Field* field_ = nullptr;
 };
