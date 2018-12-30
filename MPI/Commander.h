@@ -89,7 +89,7 @@ private:
             MPI_Send(field.array[block_size * i], block_size * ncol, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
         unsigned long size[2] = {nrow - last_start, ncol};
-        MPI_Send(size, 2, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
+        MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count, 0, MPI_COMM_WORLD);
         MPI_Send(field.array[last_start], (nrow - last_start) * ncol, MPI_CHAR, real_thread_count, 0, MPI_COMM_WORLD);
     }
 
