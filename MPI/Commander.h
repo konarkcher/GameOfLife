@@ -153,7 +153,7 @@ private:
     void PrintField() {
         for (size_t i = 0; i < nrow_; ++i) {
             for (size_t j = 0; j < ncol_; ++j) {
-                std::cout << (field_[i][j] ? "\u2B1B" : "\u2B1C");
+                std::cout << (field_[i][j] == '1' ? "\u2B1B" : "\u2B1C");
             }
             std::cout << '\n';
         }
