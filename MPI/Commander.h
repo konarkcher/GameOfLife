@@ -35,8 +35,10 @@ public:
         for (size_t i = 0; i < nrow_; ++i) {
             in >> line;
             for (size_t j = 0; j < ncol_; j += 2) {
+                std::cout << line[j];
                 field_[i][j] = line[j];
             }
+            std::cout << '\n';
         }
 
         InitiateGame();
