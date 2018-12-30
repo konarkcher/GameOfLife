@@ -34,7 +34,7 @@ public:
         std::string line;
         for (size_t i = 0; i < nrow_; ++i) {
             in >> line;
-            for (size_t j = 0; j < ncol_; ++j) {
+            for (size_t j = 0; j < ncol_; j += 2) {
                 field_[i][j] = line[j];
             }
         }
@@ -153,8 +153,7 @@ private:
     void PrintField() {
         for (size_t i = 0; i < nrow_; ++i) {
             for (size_t j = 0; j < ncol_; ++j) {
-                // std::cout << (field_[i][j] == '1' ? "\u2B1B" : "\u2B1C");
-                std::cout << field_[i][j];
+                std::cout << (field_[i][j] == '1' ? "\u2B1B" : "\u2B1C");
             }
             std::cout << '\n';
         }
