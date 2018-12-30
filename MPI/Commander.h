@@ -39,8 +39,9 @@ public:
             for (size_t j = 0; j < line.size(); j += 2) {
                 field_[i][j] = line[j];
             }
-            std::cout << '\n';
         }
+
+        PrintField();
 
         InitiateGame();
     }
