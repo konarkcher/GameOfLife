@@ -15,7 +15,7 @@ public:
 
         nrow = size[0], ncol = size[1];
         field = new Field(nrow, ncol);
-        MPI_Recv(field[0], nrow * ncol, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(field->array[0], nrow * ncol, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         StartMainLoop();
     }
