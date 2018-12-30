@@ -38,7 +38,9 @@ public:
             in >> line;
             for (size_t j = 0; j < line.size(); j += 2) {
                 field_.Get(i, j) = line[j];
+                std::cout << field_.Get(i, j);
             }
+            std::cout << '\n';
         }
 
         PrintField();
