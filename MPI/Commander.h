@@ -84,10 +84,12 @@ private:
         }
 
         for (size_t i = 0; i < real_thread_count - 1; ++i) {
-            std::cout << "Sending to rank " << i + 1 << " from " << block_size * i << ", size " << block_size * ncol << '\n';
+            unsigned long size[2] = {block_size, ncol};
+            MPI_Send(size, 2, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
             MPI_Send(field.array[block_size * i], block_size * ncol, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
-        std::cout << "Sending to rank " << real_thread_count << " from " << last_start << ", size " << (nrow - last_start) * ncol << '\n';
+        unsigned long size[2] = {nrow - last_start, ncol};
+        MPI_Send(size, 2, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
         MPI_Send(field.array[last_start], (nrow - last_start) * ncol, MPI_CHAR, real_thread_count, 0, MPI_COMM_WORLD);
     }
 
@@ -110,7 +112,6 @@ private:
 
         std::string line;
         in >> line;
-        std::cout << "NCOL LINE: " << line << '\n';
         return (line.size() + 1) / 2;
     }
 
