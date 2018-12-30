@@ -81,9 +81,11 @@ private:
         }
 
         for (size_t i = 0; i < real_thread_count - 1; ++i) {
-            MPI_Send(&field.array[block_size * i], block_size * ncol, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+            std::cout << "Sending to rank " << i + 1 << " from " << block_size * i << ", size " << block_size * ncol << '\n';
+            MPI_Send(field[block_size * i], block_size * ncol, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
-        MPI_Send(&field.array[last_start], (nrow - last_start) * ncol, MPI_CHAR, real_thread_count, 0, MPI_COMM_WORLD);
+        std::cout << "Sending to rank " << real_thread_count << " from " << last_start << ", size " << (nrow - last_start) * ncol << '\n';
+        MPI_Send(field[last_start], (nrow - last_start) * ncol, MPI_CHAR, real_thread_count, 0, MPI_COMM_WORLD);
     }
 
     size_t GetRowCount(const std::string& source) {
