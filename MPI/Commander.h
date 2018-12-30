@@ -110,6 +110,7 @@ private:
 
         std::string line;
         in >> line;
+        std::cout << "NCOL LINE: " << line << '\n';
         return line.size();
     }
 
