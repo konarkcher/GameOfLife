@@ -104,6 +104,7 @@ private:
             MPI_Send(&finalize_command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
 
+        /*
         for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
             unsigned long size[2] = {block_size, ncol_};
             MPI_Send(size, 2, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
@@ -113,6 +114,7 @@ private:
         MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count_, 0, MPI_COMM_WORLD);
         MPI_Send(field_.array[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
                  MPI_COMM_WORLD);
+        */
     }
 
     size_t GetRowCount(const std::string& source) {
