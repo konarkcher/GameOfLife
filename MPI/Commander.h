@@ -28,6 +28,9 @@ public:
 
     explicit Commander(const std::string& source)
             : nrow{GetRowCount(source)}, ncol{GetColCount(source)}, field(nrow, ncol) {
+        std::cout << "nrow: " << nrow << ", ncol: " << ncol << '\n';
+
+
         std::ifstream in;
         in.open(source);
 
