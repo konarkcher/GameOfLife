@@ -9,13 +9,13 @@ public:
     typedef ContigousArray<char> Field;
 
     explicit Computer(const int world_rank)
-            : rank(world_rank) {
+            : rank_(world_rank) {
         unsigned long size[2];
         MPI_Recv(&size, 2, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        nrow = size[0], ncol = size[1];
-        field = new Field(nrow, ncol);
-        MPI_Recv(field->array[0], nrow * ncol, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        nrow_ = size[0], ncol_ = size[1];
+        field_ = new Field(nrow_, ncol_);
+        MPI_Recv(field_->array[0], nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         StartMainLoop();
     }
@@ -29,16 +29,38 @@ private:
                 if (message_available) {
                     char command;
                     MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    std::cout << rank << ' ' << command << '\n';
+
+                    if (command == 'q') {
+                        return;
+                    } else if (command == 'r') {
+                        UpdateIterations();
+                    } else if (command == 's') {
+                        field_required = true;
+                        MPI_Send(&required_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
+                        UpdateIterations();
+                    } else {
+                        std::cout << "UNKNOWN COMMAND " << command << " IN MAIN LOOP\n";
+                    }
                 }
-            } while (required_iter == done_iter);
+
+                if(required_iter_ == done_iter_ && field_required) {
+                    field_required = false;
+                    MPI_Send(field_->array[0], nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+                }
+            } while (required_iter_ == done_iter_);
+
+            ++done_iter_;
         }
+    }
+
+    void UpdateIterations() {
+        MPI_Recv(&required_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
     bool field_required{false};
 
-    size_t nrow{0}, ncol{0};
-    size_t required_iter{0}, done_iter{0};
-    int rank;
-    Field* field = nullptr;
+    size_t nrow_{0}, ncol_{0};
+    unsigned long required_iter_{0}, done_iter_{0};
+    int rank_;
+    Field* field_ = nullptr;
 };

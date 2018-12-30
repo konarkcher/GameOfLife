@@ -12,14 +12,14 @@ public:
     typedef ContigousArray<char> Field;
 
     Commander(const size_t height, const size_t width)
-            : nrow{height}, ncol{width}, field(nrow, ncol) {
+            : nrow_{height}, ncol_{width}, field_(nrow_, ncol_) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::bernoulli_distribution bern(0.5);
 
         for (size_t i = 0; i < height; ++i) {
             for (size_t j = 0; j < width; ++j) {
-                field[i][j] = bern(gen);
+                field_[i][j] = bern(gen);
             }
         }
 
@@ -27,18 +27,15 @@ public:
     }
 
     explicit Commander(const std::string& source)
-            : nrow{GetRowCount(source)}, ncol{GetColCount(source)}, field(nrow, ncol) {
-        std::cout << "nrow: " << nrow << ", ncol: " << ncol << '\n';
-
-
+            : nrow_{GetRowCount(source)}, ncol_{GetColCount(source)}, field_(nrow_, ncol_) {
         std::ifstream in;
         in.open(source);
 
         std::string line;
-        for (size_t i = 0; i < nrow; ++i) {
+        for (size_t i = 0; i < nrow_; ++i) {
             in >> line;
-            for (size_t j = 0; j < ncol; ++j) {
-                field[i][j] = line[j];
+            for (size_t j = 0; j < ncol_; ++j) {
+                field_[i][j] = line[j];
             }
         }
 
@@ -46,7 +43,7 @@ public:
     }
 
     bool RequestStatus() {
-        if (!game_stopped) {
+        if (!game_stopped_) {
             return false;
         }
         PrintStatus();
@@ -54,15 +51,35 @@ public:
     }
 
     void Run(const size_t iteration_count) {
+        required_iter_ += iteration_count;
         NotifyAll('r');
+        SendIterations();
+        game_stopped_ = false;
     }
 
     void Stop() {
         NotifyAll('s');
+        required_iter_ = 0;
+        for (size_t i = 0; i < real_thread_count_; ++i) {
+            unsigned long cur_iter;
+            MPI_Recv(&cur_iter, 1, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            required_iter_ = std::max(required_iter_, cur_iter);
+        }
+        SendIterations();
+
+        size_t block_size = nrow_ / real_thread_count_;
+        size_t last_start = (real_thread_count_ - 1) * block_size;
+
+        for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
+            MPI_Recv(field_.array[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
+        }
+        MPI_Recv(field_.array[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        game_stopped_ = true;
     }
 
     void Quit() {
-        Stop();
         NotifyAll('q');
     }
 
@@ -72,25 +89,26 @@ private:
         MPI_Comm_size(MPI_COMM_WORLD, &world_size);
         auto thread_count = static_cast<size_t> (world_size) - 1;
 
-        real_thread_count = std::min(thread_count, nrow);
-        size_t block_size = nrow / real_thread_count;
-        size_t last_start = (real_thread_count - 1) * block_size;
+        real_thread_count_ = std::min(thread_count, nrow_);
+        size_t block_size = nrow_ / real_thread_count_;
+        size_t last_start = (real_thread_count_ - 1) * block_size;
 
         NotifyAll('c');
 
         char finalize_command = 'f';
-        for (size_t i = real_thread_count; i < thread_count; ++i) {
+        for (size_t i = real_thread_count_; i < thread_count; ++i) {
             MPI_Send(&finalize_command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
 
-        for (size_t i = 0; i < real_thread_count - 1; ++i) {
-            unsigned long size[2] = {block_size, ncol};
+        for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
+            unsigned long size[2] = {block_size, ncol_};
             MPI_Send(size, 2, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
-            MPI_Send(field.array[block_size * i], block_size * ncol, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+            MPI_Send(field_.array[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
-        unsigned long size[2] = {nrow - last_start, ncol};
-        MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count, 0, MPI_COMM_WORLD);
-        MPI_Send(field.array[last_start], (nrow - last_start) * ncol, MPI_CHAR, real_thread_count, 0, MPI_COMM_WORLD);
+        unsigned long size[2] = {nrow_ - last_start, ncol_};
+        MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count_, 0, MPI_COMM_WORLD);
+        MPI_Send(field_.array[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
+                 MPI_COMM_WORLD);
     }
 
     size_t GetRowCount(const std::string& source) {
@@ -116,8 +134,14 @@ private:
     }
 
     void NotifyAll(char command) {
-        for (size_t i = 0; i < real_thread_count; ++i) {
+        for (size_t i = 0; i < real_thread_count_; ++i) {
             MPI_Send(&command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+        }
+    }
+
+    void SendIterations() {
+        for (size_t i = 0; i < real_thread_count_; ++i) {
+            MPI_Send(&required_iter_, 1, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
         }
     }
 
@@ -127,20 +151,20 @@ private:
     }
 
     void PrintField() {
-        for (size_t i = 0; i < nrow; ++i) {
-            for (size_t j = 0; j < ncol; ++j) {
-                std::cout << (field[i][j] ? "\u2B1B" : "\u2B1C");
+        for (size_t i = 0; i < nrow_; ++i) {
+            for (size_t j = 0; j < ncol_; ++j) {
+                std::cout << (field_[i][j] ? "\u2B1B" : "\u2B1C");
             }
             std::cout << '\n';
         }
     }
 
-    size_t required_iter_{0};
-    size_t real_thread_count{0};
-    size_t nrow, ncol;
-    bool game_stopped{true};
+    unsigned long required_iter_{0};
+    size_t real_thread_count_{0};
+    size_t nrow_, ncol_;
+    bool game_stopped_{true};
 
-    Field field;
+    Field field_;
 };
 
 void QuitGame(Commander*& game, bool verbose) {
