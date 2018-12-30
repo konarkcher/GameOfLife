@@ -29,21 +29,22 @@ private:
                 if (message_available) {
                     char command;
                     MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
                     if (command == 'q') {
                         return;
                     } else if (command == 'r') {
                         UpdateIterations();
                     } else if (command == 's') {
+                        std::cout << rank_ << " NEED TO STOP\n";
                         field_required = true;
                         MPI_Send(&required_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
                         UpdateIterations();
+                        std::cout << rank_ << " NEED TO MAKE " << required_iter_ - done_iter_ << "ITERATIONS\n";
                     } else {
                         std::cout << "UNKNOWN COMMAND " << command << " IN MAIN LOOP\n";
                     }
                 }
 
-                if(required_iter_ == done_iter_ && field_required) {
+                if (required_iter_ == done_iter_ && field_required) {
                     field_required = false;
                     MPI_Send(field_->array[0], nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
                 }
