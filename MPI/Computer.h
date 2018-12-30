@@ -34,11 +34,9 @@ private:
                     } else if (command == 'r') {
                         UpdateIterations();
                     } else if (command == 's') {
-                        std::cout << rank_ << " NEED TO STOP\n";
                         field_required = true;
                         MPI_Send(&done_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
                         UpdateIterations();
-                        std::cout << rank_ << " NEED TO MAKE " << required_iter_ - done_iter_ << " ITERATIONS\n";
                     } else {
                         std::cout << "UNKNOWN COMMAND " << command << " IN MAIN LOOP\n";
                     }
