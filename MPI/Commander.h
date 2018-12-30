@@ -111,7 +111,7 @@ private:
         std::string line;
         in >> line;
         std::cout << "NCOL LINE: " << line << '\n';
-        return line.size();
+        return (line.size() + 1) / 2;
     }
 
     void NotifyAll(char command) {
