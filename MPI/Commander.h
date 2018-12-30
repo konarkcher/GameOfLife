@@ -37,8 +37,8 @@ public:
         for (size_t i = 0; i < nrow_; ++i) {
             in >> line;
             for (size_t j = 0; j < line.size(); j += 2) {
-                std::cout << line[j];
-                field_.array[i][j] = line[j];
+                field_[i][j] = line[j];
+                std::cout << field_[i][j];
             }
             std::cout << '\n';
         }
@@ -158,7 +158,7 @@ private:
         for (size_t i = 0; i < nrow_; ++i) {
             for (size_t j = 0; j < ncol_; ++j) {
                 // std::cout << (field_[i][j] == '1' ? "\u2B1B" : "\u2B1C");
-                std::cout << field_.array[i][j];
+                std::cout << field_[i][j];
             }
             std::cout << '\n';
         }
