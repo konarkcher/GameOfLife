@@ -28,6 +28,8 @@ public:
 
     explicit Commander(const std::string& source)
             : nrow_{GetRowCount(source)}, ncol_{GetColCount(source)}, field_(nrow_, ncol_) {
+        std::cout << "nrow: " << nrow_ << ", ncol: " << ncol_ << '\n';
+
         std::ifstream in;
         in.open(source);
 
@@ -35,8 +37,10 @@ public:
         for (size_t i = 0; i < nrow_; ++i) {
             in >> line;
             for (size_t j = 0; j < line.size(); j += 2) {
+                std::cout << line[j];
                 field_[i][j] = line[j];
             }
+            std::cout << '\n';
         }
 
         InitiateGame();
