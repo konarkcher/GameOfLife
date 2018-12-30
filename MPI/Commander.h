@@ -34,11 +34,9 @@ public:
         std::string line;
         for (size_t i = 0; i < nrow_; ++i) {
             in >> line;
-            for (size_t j = 0; j < ncol_; j += 2) {
-                std::cout << line[j];
+            for (size_t j = 0; j < ncol_ * 2; j += 2) {
                 field_[i][j] = line[j];
             }
-            std::cout << '\n';
         }
 
         InitiateGame();
