@@ -7,19 +7,17 @@ template<typename T>
 class ContigousArray {
 public:
     ContigousArray(size_t nrows, size_t ncols)
-            : ncols_(ncols), array(nrows * ncols) {
+            : pool(nrows * ncols), array(nrows) {
+        for (unsigned i = 0; i < nrows; ++i) {
+            array[i] = &pool[i * ncols];
+        }
     }
 
-    T& Get(size_t i, size_t j = 0) {
-        return array[i * ncols_ + j];
-    }
-
-    T& operator[](size_t i) {
-        return Get(i);
+    T* operator[](size_t index) {
+        return array[index];
     }
 
 private:
-    size_t ncols_;
-
-    std::vector<T> array;
+    std::vector<T> pool;
+    std::vector<T*> array;
 };

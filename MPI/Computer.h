@@ -15,7 +15,7 @@ public:
 
         nrow_ = size[0], ncol_ = size[1];
         field_ = new Field(nrow_, ncol_);
-        MPI_Recv(&field_->Get(0), nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(field_[0], nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         StartMainLoop();
     }
@@ -46,7 +46,7 @@ private:
 
                 if (required_iter_ == done_iter_ && field_required) {
                     field_required = false;
-                    MPI_Send(&field_->Get(0), nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+                    MPI_Send(field_[0], nrow_ * ncol_, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
                 }
             } while (required_iter_ == done_iter_);
 
