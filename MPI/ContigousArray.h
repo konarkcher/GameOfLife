@@ -1,14 +1,13 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
 
 template<typename T>
 class ContigousArray {
 public:
-    ContigousArray(size_t nrows, size_t ncols) {
-        auto pool = new T[nrows * ncols];
-        array = new T* [nrows];
-
+    ContigousArray(size_t nrows, size_t ncols)
+            : pool(nrows * ncols), array(nrows) {
         for (unsigned i = 0; i < nrows; ++i) {
             array[i] = &pool[i * ncols];
         }
@@ -18,10 +17,7 @@ public:
         return array[index];
     }
 
-    ~ContigousArray() {
-        delete[] array[0];  // remove the pool
-        delete[] array;
-    }
-
-    T** array;
+private:
+    std::vector<T> pool;
+    std::vector<T*> array;
 };

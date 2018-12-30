@@ -38,7 +38,6 @@ public:
             in >> line;
             for (size_t j = 0; j < line.size(); j += 2) {
                 field_[i][j] = line[j];
-                std::cout << field_[i][j];
             }
             std::cout << '\n';
         }
@@ -75,10 +74,10 @@ public:
         size_t last_start = (real_thread_count_ - 1) * block_size;
 
         for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
-            MPI_Recv(field_.array[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD,
+            MPI_Recv(field_[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD,
                      MPI_STATUS_IGNORE);
         }
-        MPI_Recv(field_.array[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
+        MPI_Recv(field_[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         game_stopped_ = true;
     }
@@ -104,17 +103,15 @@ private:
             MPI_Send(&finalize_command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
 
-        /*
         for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
             unsigned long size[2] = {block_size, ncol_};
             MPI_Send(size, 2, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD);
-            MPI_Send(field_.array[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+            MPI_Send(field_[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
         }
         unsigned long size[2] = {nrow_ - last_start, ncol_};
         MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count_, 0, MPI_COMM_WORLD);
-        MPI_Send(field_.array[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
+        MPI_Send(field_[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0,
                  MPI_COMM_WORLD);
-        */
     }
 
     size_t GetRowCount(const std::string& source) {
@@ -159,8 +156,7 @@ private:
     void PrintField() {
         for (size_t i = 0; i < nrow_; ++i) {
             for (size_t j = 0; j < ncol_; ++j) {
-                // std::cout << (field_[i][j] == '1' ? "\u2B1B" : "\u2B1C");
-                std::cout << field_[i][j];
+                std::cout << (field_[i][j] == '1' ? "\u2B1B" : "\u2B1C");
             }
             std::cout << '\n';
         }
