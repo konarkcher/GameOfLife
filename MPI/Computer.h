@@ -29,10 +29,10 @@ private:
         while (true) {
             int message_available = 0;
             do {
-                MPI_Iprobe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &message_available, MPI_STATUS_IGNORE);
+                MPI_Iprobe(0, 21, MPI_COMM_WORLD, &message_available, MPI_STATUS_IGNORE);
                 if (message_available) {
                     char command;
-                    MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Recv(&command, 1, MPI_CHAR, 0, 21, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     if (command == 'q') {
                         return;
                     } else if (command == 'r') {

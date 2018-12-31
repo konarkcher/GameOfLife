@@ -10,7 +10,7 @@ int main() {
     if (world_rank != 0) {
         while (true) {
             char command;
-            MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&command, 1, MPI_CHAR, 0, 21, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             if (command != 'f') {
                 Computer computer(world_rank);

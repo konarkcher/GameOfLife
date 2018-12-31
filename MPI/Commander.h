@@ -107,7 +107,7 @@ private:
 
         char finalize_command = 'f';
         for (size_t i = real_thread_count_; i < thread_count; ++i) {
-            MPI_Send(&finalize_command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+            MPI_Send(&finalize_command, 1, MPI_CHAR, i + 1, 21, MPI_COMM_WORLD);
         }
 
         for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
@@ -156,7 +156,7 @@ private:
 
     void NotifyAll(char command) {
         for (size_t i = 0; i < real_thread_count_; ++i) {
-            MPI_Send(&command, 1, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD);
+            MPI_Send(&command, 1, MPI_CHAR, i + 1, 21, MPI_COMM_WORLD);
         }
     }
 
