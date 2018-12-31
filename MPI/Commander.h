@@ -177,6 +177,7 @@ private:
     void CheckStop() {
         int message_available = 0;
         MPI_Iprobe(1, 11, MPI_COMM_WORLD, &message_available, MPI_STATUS_IGNORE);
+        std::cout << "Let's try to stop!\n";
         if(message_available) {
             char message;
             MPI_Recv(&message, 1, MPI_CHAR, 1, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
