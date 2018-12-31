@@ -69,7 +69,7 @@ public:
         required_iter_ = 0;
         for (size_t i = 0; i < real_thread_count_; ++i) {
             unsigned long cur_iter;
-            std::cout << "MPI_Recv(&cur_iter, 1, MPI_UNSIGNED_LONG, " << i + 1 << ", 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\n"
+            std::cout << "MPI_Recv(&cur_iter, 1, MPI_UNSIGNED_LONG, " << i + 1 << ", 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\n";
             MPI_Recv(&cur_iter, 1, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             required_iter_ = std::max(required_iter_, cur_iter);
         }
