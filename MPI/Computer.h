@@ -88,12 +88,12 @@ private:
 
             delete field_;
             field_ = updated_field;
-            ++done_iter_;
-
-            if(rank_ == 1 && required_iter_ == done_iter_) {
+            if(rank_ == 1 && required_iter_ == done_iter_ + 1) {
                 char stop = 's';
+                std::cout << "IT'S TIME TO STOP!!!\n";
                 MPI_Send(&stop, 1, MPI_CHAR, 0, 11, MPI_COMM_WORLD);
             }
+            ++done_iter_;
         }
     }
 
