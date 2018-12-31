@@ -44,9 +44,13 @@ public:
 
     bool RequestStatus() {
         unsigned long required_backup = required_iter_;
+        std::cout << "LET'S CHECK\n";
         Stop();
+        std::cout << "MAYBE RUN\n";
         if (required_iter_ != required_backup) {
+            std::cout << "RUN\n";
             Run(required_backup - required_iter_);
+            std::cout << "EZ\n";
         }
 
         if (!game_stopped_) {
