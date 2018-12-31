@@ -44,13 +44,9 @@ public:
 
     bool RequestStatus() {
         unsigned long required_backup = required_iter_;
-        std::cout << "LET'S CHECK\n";
         Stop();
-        std::cout << "MAYBE RUN\n";
         if (required_iter_ != required_backup) {
-            std::cout << "RUN\n";
             Run(required_backup - required_iter_);
-            std::cout << "EZ\n";
         }
 
         if (!game_stopped_) {
@@ -68,21 +64,26 @@ public:
     }
 
     void Stop() {
+        std::cout << "NotifyAll('s');\n";
         NotifyAll('s');
         required_iter_ = 0;
         for (size_t i = 0; i < real_thread_count_; ++i) {
             unsigned long cur_iter;
+            std::cout << "MPI_Recv(&cur_iter, 1, MPI_UNSIGNED_LONG, " << i + 1 << ", 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\n"
             MPI_Recv(&cur_iter, 1, MPI_UNSIGNED_LONG, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             required_iter_ = std::max(required_iter_, cur_iter);
         }
+        std::cout << "SendIterations();\n";
         SendIterations();
 
         size_t block_size = nrow_ / real_thread_count_;
         size_t last_start = (real_thread_count_ - 1) * block_size;
 
         for (size_t i = 0; i < real_thread_count_ - 1; ++i) {
+            std::cout << "MPI_Recv(field_[block_size * i], block_size * ncol_, MPI_CHAR, " << i + 1 << ", 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\n";
             MPI_Recv(field_[block_size * i], block_size * ncol_, MPI_CHAR, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
+        std::cout << "MPI_Recv(field_[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);\n";
         MPI_Recv(field_[last_start], (nrow_ - last_start) * ncol_, MPI_CHAR, real_thread_count_, 0, MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
         game_stopped_ = true;
