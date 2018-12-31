@@ -43,7 +43,12 @@ public:
     }
 
     bool RequestStatus() {
-        CheckStop();
+        unsigned long required_backup = required_iter_;
+        Stop();
+        if (required_iter_ != required_backup) {
+            Run(required_backup - required_iter_);
+        }
+
         if (!game_stopped_) {
             return false;
         }
@@ -52,7 +57,6 @@ public:
     }
 
     void Run(const size_t iteration_count) {
-        CheckStop();
         required_iter_ += iteration_count;
         NotifyAll('r');
         SendIterations();
@@ -60,8 +64,6 @@ public:
     }
 
     void Stop() {
-        CheckStop();
-
         NotifyAll('s');
         required_iter_ = 0;
         for (size_t i = 0; i < real_thread_count_; ++i) {
@@ -83,7 +85,6 @@ public:
     }
 
     void Quit() {
-        CheckStop();
         NotifyAll('q');
     }
 
@@ -171,19 +172,6 @@ private:
                 std::cout << field_[i][j];
             }
             std::cout << '\n';
-        }
-    }
-
-    void CheckStop() {
-        int message_available = 0;
-        MPI_Iprobe(1, 11, MPI_COMM_WORLD, &message_available, MPI_STATUS_IGNORE);
-        std::cout << "Let's try to stop!\n";
-        if(message_available) {
-            char message;
-            MPI_Recv(&message, 1, MPI_CHAR, 1, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            std::cout << "STOPPING...\n";
-            Stop();
-            std::cout << "STOPPED!\n";
         }
     }
 
