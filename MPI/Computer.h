@@ -14,8 +14,6 @@ public:
         MPI_Recv(&neighs, 2, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         prev_ = neighs[0], next_ = neighs[1];
 
-        std::cout << prev_ << ' ' << rank_ << ' ' << next_ << '\n';
-
         unsigned long size[2];
         MPI_Recv(&size, 2, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
@@ -54,12 +52,65 @@ private:
                 }
             } while (required_iter_ == done_iter_);
 
+            std::vector<char> prev_field(ncol_), next_field(ncol_);
+            if (rank_ % 2 == 0) {
+                MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
+                MPI_Send(field_->operator[](nrow_ - 1), ncol, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
+
+                MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            } else {
+                if (rank_ == 1 && prev_ % 2 == 1) {
+                    MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
+                    MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                } else {
+                    MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
+                }
+                MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Send(field_->operator[](nrow_ - 1), ncol, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
+            }
+
+            auto updated_field = new Field(nrow_, ncol_);
+
+            for (size_t i = 0; i < nrow_; ++i) {
+                for (size_t j = 0; j < ncol_; ++j) {
+                    size_t alive_count = CountAlive(prev_field, next_field, i, j);
+
+                    if (field_->operator[](i)[j] == '1') {
+                        updated_field->operator[](i)[j] = (alive_count == 2 || alive_count == 3 ? '1' : '0');
+                    } else {
+                        updated_field->operator[](i)[j] = (alive_count == 3 ? '1' : '0');
+                    }
+                }
+            }
+
+            delete field_;
+            field_ = updated_field;
             ++done_iter_;
         }
     }
 
     void UpdateIterations() {
         MPI_Recv(&required_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    size_t CountAlive(const std::vector<char>& prev_field, const std::vector<char>& next_field, size_t i, size_t j) {
+        size_t count = 0;
+        for (int vshift = -1; vshift < 2; ++vshift) {
+            for (int hshift = -1; hshift < 2; ++hshift) {
+                size_t hind = (j + hshift + ncol_) % ncol_;
+
+                if(i == 0 && vshift == -1) {
+                    count += static_cast<int> (prev_field[hind] == '1');
+                } else if (i == nrow_ - 1 && vshift == 1) {
+                    count += static_cast<int> (next_field[hind] == '1');
+                } else {
+                    count += static_cast<int> (field_->operator[](i + vshift)[hind] == '1');
+                }
+            }
+        }
+        return count - static_cast<int> (field_->operator[](i)[j] == '1');
     }
 
     bool field_required{false};
