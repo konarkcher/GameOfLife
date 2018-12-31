@@ -54,32 +54,44 @@ private:
 
             std::vector<char> prev_field(ncol_), next_field(ncol_);
             if (rank_ % 2 == 0) {
-                std::cout << rank_ <<  " SENDS TO " << prev_ << '\n';
-                std::cout << rank_ <<  " SENDS TO " << next_ << '\n';
                 MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
                 MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
 
-                std::cout << rank_ <<  " RECEIVES FROM " << prev_ << '\n';
-                std::cout << rank_ <<  " RECEIVES FROM " << next_ << '\n';
                 MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             } else {
                 if (rank_ == 1 && prev_ % 2 == 1) {
-                    std::cout << rank_ <<  " SENDS TO " << prev_ << '\n';
-                    std::cout << rank_ <<  " RECEIVES FROM " << prev_ << '\n';
                     MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
                     MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 } else {
-                    std::cout << rank_ <<  " RECEIVES FROM " << prev_ << '\n';
-                    std::cout << rank_ <<  " SENDS TO " << prev_ << '\n';
                     MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
                 }
-                std::cout << rank_ <<  " RECEIVES FROM " << next_ << '\n';
-                std::cout << rank_ <<  " SENDS TO " << next_ << '\n';
+
                 MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
             }
+
+            std::cout << rank_ << ": ";
+            for (size_t i = 0; i < ncol_; ++i) {
+                std::cout << prev_field[i];
+            }
+            std::cout << '\n';
+
+            for (size_t i = 0; i < nrow_; ++i) {
+                std::cout << rank_ << ": ";
+                for (size_t j = 0; j < ncol_; ++j) {
+                    std::cout << field_->operator[](i)[j];
+                }
+                std::cout << '\n';
+            }
+
+            std::cout << rank_ << ": ";
+            for (size_t i = 0; i < ncol_; ++i) {
+                std::cout << next_field[i];
+            }
+            std::cout << '\n';
+
 
             auto updated_field = new Field(nrow_, ncol_);
 
@@ -111,7 +123,7 @@ private:
             for (int hshift = -1; hshift < 2; ++hshift) {
                 size_t hind = (j + hshift + ncol_) % ncol_;
 
-                if(i == 0 && vshift == -1) {
+                if (i == 0 && vshift == -1) {
                     count += static_cast<int> (prev_field[hind] == '1');
                 } else if (i == nrow_ - 1 && vshift == 1) {
                     count += static_cast<int> (next_field[hind] == '1');
