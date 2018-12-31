@@ -52,8 +52,6 @@ private:
                 }
             } while (required_iter_ == done_iter_);
 
-            std::cout << prev_ << ' ' << rank_ << ' ' << next_ << '\n';
-
             std::vector<char> prev_field(ncol_), next_field(ncol_);
             if (rank_ % 2 == 0) {
                 MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
@@ -73,27 +71,6 @@ private:
                 MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
             }
-
-            std::cout << rank_ << ": ";
-            for (size_t i = 0; i < ncol_; ++i) {
-                std::cout << prev_field[i];
-            }
-            std::cout << '\n';
-
-            for (size_t i = 0; i < nrow_; ++i) {
-                std::cout << rank_ << ": ";
-                for (size_t j = 0; j < ncol_; ++j) {
-                    std::cout << field_->operator[](i)[j];
-                }
-                std::cout << '\n';
-            }
-
-            std::cout << rank_ << ": ";
-            for (size_t i = 0; i < ncol_; ++i) {
-                std::cout << next_field[i];
-            }
-            std::cout << '\n';
-
 
             auto updated_field = new Field(nrow_, ncol_);
 

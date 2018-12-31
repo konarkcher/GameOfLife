@@ -61,7 +61,7 @@ public:
 
     void Stop() {
         CheckStop();
-        
+
         NotifyAll('s');
         required_iter_ = 0;
         for (size_t i = 0; i < real_thread_count_; ++i) {
@@ -180,7 +180,9 @@ private:
         if(message_available) {
             char message;
             MPI_Recv(&message, 1, MPI_CHAR, 1, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            std::cout << "STOPPING...\n";
             Stop();
+            std::cout << "STOPPED!\n";
         }
     }
 
