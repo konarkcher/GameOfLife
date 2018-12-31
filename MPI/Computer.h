@@ -39,6 +39,7 @@ private:
                         UpdateIterations();
                     } else if (command == 's') {
                         field_required = true;
+                        std::cout << "MPI_Send(&done_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);\n";
                         MPI_Send(&done_iter_, 1, MPI_UNSIGNED_LONG, 0, 0, MPI_COMM_WORLD);
                         UpdateIterations();
                     } else {
