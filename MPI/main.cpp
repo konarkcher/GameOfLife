@@ -8,11 +8,13 @@ int main() {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
     if (world_rank != 0) {
-        char command;
-        MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        while (true) {
+            char command;
+            MPI_Recv(&command, 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        if (command != 'f') {
-            Computer computer(world_rank);
+            if (command != 'f') {
+                Computer computer(world_rank);
+            }
         }
     } else {
         Commander* game = nullptr;
