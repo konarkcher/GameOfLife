@@ -52,26 +52,26 @@ private:
                 }
             } while (required_iter_ == done_iter_);
 
-            std::cout << prev_ << ' ' << rank_ << ' ' << next_;
+            std::cout << prev_ << ' ' << rank_ << ' ' << next_ << '\n';
 
             std::vector<char> prev_field(ncol_), next_field(ncol_);
             if (rank_ % 2 == 0) {
                 MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
-                MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-                MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 1, MPI_COMM_WORLD);
+                MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
                 MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             } else {
                 if (rank_ == 1 && prev_ % 2 == 1) {
                     MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
-                    MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 } else {
-                    MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
                 }
 
                 MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 1, MPI_COMM_WORLD);
+                MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
             }
 
             std::cout << rank_ << ": ";
