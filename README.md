@@ -24,6 +24,5 @@ Other commands may cause undefined behaviour.
 * RUN \<iteration_count>
 * STOP
 * QUIT
-* END — same as QUIT but also stop the whole program
 
 Other commands may cause undefined behaviour.

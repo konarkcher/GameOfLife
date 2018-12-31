@@ -19,7 +19,7 @@ public:
 
         for (size_t i = 0; i < height; ++i) {
             for (size_t j = 0; j < width; ++j) {
-                field_[i][j] = bern(gen);
+                field_[i][j] = (bern(gen) ? '1' : '0');
             }
         }
 
@@ -44,13 +44,9 @@ public:
 
     bool RequestStatus() {
         unsigned long required_backup = required_iter_;
-        std::cout << "LET'S CHECK\n";
         Stop();
-        std::cout << "MAYBE RUN\n";
         if (required_iter_ != required_backup) {
-            std::cout << "RUN\n";
             Run(required_backup - required_iter_);
-            std::cout << "EZ\n";
         }
 
         if (!game_stopped_) {
