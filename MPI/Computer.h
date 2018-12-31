@@ -63,14 +63,18 @@ private:
                 MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             } else {
                 if (rank_ == 1 && prev_ % 2 == 1) {
+                    std::cout << "SENDING PREV\n";
                     MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
+                    std::cout << "RECEIVING NEXT\n";
                     MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 } else {
                     MPI_Recv(&next_field[0], ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
                 }
 
+                std::cout << "RECEIVING PREV\n";
                 MPI_Recv(&prev_field[0], ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                std::cout << "SENDING NEXT\n";
                 MPI_Send(field_->operator[](nrow_ - 1), ncol_, MPI_CHAR, next_, 0, MPI_COMM_WORLD);
             }
 
