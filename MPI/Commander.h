@@ -112,6 +112,9 @@ private:
         }
         unsigned long size[2] = {nrow_ - last_start, ncol_};
         int neighs[2] = {static_cast<int> (real_thread_count_ - 1), 1};
+        if (neighs[0] == 0) {
+            neighs[0] = static_cast<int> (real_thread_count_);
+        }
 
         MPI_Send(neighs, 2, MPI_INT, real_thread_count_, 0, MPI_COMM_WORLD);
         MPI_Send(size, 2, MPI_UNSIGNED_LONG, real_thread_count_, 0, MPI_COMM_WORLD);
