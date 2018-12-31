@@ -52,6 +52,8 @@ private:
                 }
             } while (required_iter_ == done_iter_);
 
+            std::cout << prev_ << ' ' << rank_ << ' ' << next_;
+
             std::vector<char> prev_field(ncol_), next_field(ncol_);
             if (rank_ % 2 == 0) {
                 MPI_Send(field_->operator[](0), ncol_, MPI_CHAR, prev_, 0, MPI_COMM_WORLD);
