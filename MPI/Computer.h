@@ -112,6 +112,11 @@ private:
             delete field_;
             field_ = updated_field;
             ++done_iter_;
+
+            if(rank_ == 1 && required_iter_ == done_iter_) {
+                char stop = 's';
+                MPI_Send(&stop, 1, MPI_CHAR, 0, 11, MPI_COMM_WORLD);
+            }
         }
     }
 
